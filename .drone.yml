@@ -1,0 +1,92 @@
+workspace:
+  base: /go
+pipeline:
+  unit-tests:
+   image: golang:1.11.0-stretch
+   environment:
+     RABBIT_PATH: amqp://default_user:default_password@rabbitmq_test:5672/unit_testing
+     DATABASE_URL: test.db
+     DATABASE_TYPE: sqlite3
+     API_RESPONSES_QUEUE: api_responses
+     USERS_HANDLE_QUEUE: "users_handle"
+   commands:
+     - chmod +x scripts/setup.sh
+     - ./scripts/setup.sh
+     - export GO111MODULE=on
+     - go build
+     - go test ./...
+
+  publish-to-gcr:
+    image: plugins/gcr
+    repo: liftit-os/optiuser
+    tags: ${DRONE_COMMIT}
+    json_key: ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAibGlmdGl0LW9zIiwKICAicHJpdmF0ZV9rZXlfaWQiOiAiNmQzMDZkYzc1MTFmNGJlZjYzYjk2YmViNTFkNWYwNWNiZjc0Mzg1ZSIsCiAgInByaXZhdGVfa2V5IjogIi0tLS0tQkVHSU4gUFJJVkFURSBLRVktLS0tLVxuTUlJRXZRSUJBREFOQmdrcWhraUc5dzBCQVFFRkFBU0NCS2N3Z2dTakFnRUFBb0lCQVFDczVxakgrOVJiQ1RYL1xuZWhkbG9XNkJwVVgwWjRuc3h2Vmx1Ly9iZk9qYS9qMkU3Tk5adVZrQnRDamowTFlwRTFKcVJmNit5Smo4VXU2TFxuWk1tNHdZSjBHbG5sM0k5T2VLekU5NDN3aHNOSU4xL09zdnpQZmpLVjNkUkhXc3hLNnJNUXUzSDBmZE5SSW5LOFxuUWVkeWNXU2lBMjBCSUxCTkxCYm8wVFJ1cnk2cEd1MUJub2k5cFZtWWJaVTBNWnowS0NOajl5eXNkdm9wOGVTTFxubittTmUzV2ZkSW9TaTZleStVcHhPTmNzdnExR3NhNXJJNlRwVlZpMm5hSFF4bDNXcWtGaTVlMC85QWEyTlJHMFxuMlIyQ3pTbXJtMTk5VE9sRUUyQkFNN09HS0ZLc0U2ZkY0c3F1dlN2TE9jOGo4bXhYTnQrdzNOWktPakY1bFFKWlxuY1NwUlQ3OXZBZ01CQUFFQ2dnRUFGdHlLM2FLQk1pWldJdmtvUmRKaUU3ZGdPQkJHcnUyaHZmbHRPNzdZNVRmdlxudDNjKy9PS2lqN1NjSVg5VHpydVV6cU9CcXdWSUlUanYvTE52YnNQN2RWR1VxRzJRNzAzS2ZtTERQRlg5VlR1cFxuS2VJRnhvUEh1WVF5ME5xREg3Ykh4WU1iYnJvQ2FueDFFa3BlaVlYUHloSk00L1RJQ3ZRMDlVVFFPNEJqV1kyVFxuUVc2TlNxNmRweU1WTzExVG1ZQjA1amZiL2NWcS91bzZzQ2tqUzE4VEtVRVJCM1NnM1FJYloyZHYrby9FekdvcVxuaGVnMkc4bm1PY1R6ZllOWmR2Vks3dmNZUVk4MjF2Y3gvMTU3M1lteS93OEVKamJpbnhZOTVUWkZiczdmVWhYeFxucXJxYWpwWHRNMFRsT2JNUWlIakdYeEl4OXE0a0c5UC93Wm9uVWhPQnRRS0JnUUR4QzYxMjdFdU9jWllteFhBWVxuQXU3ZEYzSU9ybEwvN0dsV0gwcnpJV2xUS2lvdmljRG5xNTl2TU01SDhNQWNlc21BcXBNbW9LYk5oRCtiSGRIbFxuc3BpeDlUdThEVnlwZVJuR3NyQTExS1ZrQktPRzNUK1lwK25SUkV0QVVPTHlFUkw2bmIxTHpWMGZiWjZJSXN1NVxub0lIRHBXUktUYi80ZURiTnhlUTlqZVJkRFFLQmdRQzNvTEx2Ykdndmc4S2pLdDJkZjBNWnN3M2M2Q25razIrcFxuN2pEWktQdmJ6LzVvREtLZlAxSHRTWFgrOHZrVEtYQjVmekhpRjlHQnZQbWw1NEE4T0VEVTFLbm5yVHpSMHBjZlxuQ0ZsM1FZTFp0RFBxSXhZalhkaTdIeTFBQmdKRWxmRnN6dXVaU1NTN3dObi9BYnZES3ZLbXJXQlNMT1QzT3VKSlxuZ1JNSStEZUhhd0tCZ1FEU2xLY1lhOXFlT0xFNmNlWTVzK1pGbElQNk8yVWJXOGV5aTJnSSs3bHVCRG9TaWIvVFxuSk9ZR1Y1YisxbDZmQXM0aTcrSGFMeU5LREMwZE1ISDh2NGdTZi9HTm1nYkhyNXBMTWpRcTh2a0NaZU1Pb1I4OFxuR0FWMjRyanpHVGNLenN2TDBoNWJxSytnRXo0YUpIdmlVVXpNUlNOV25wSUZXZEJXK0hrckpWakp5UUtCZ0RhU1xuanJzekY1K1BaQWdFRkVyYmFJQzV3eFAwOTRaVC91cWN2RzI5aldSZFl6bGZEL0dONnZZL1Q4OE9QTkhpRGVnOVxuMGdCa25jSVYvSWUremxDWFUwVXRVclZrdWQrTjI1WEFjSDVOdk9xZ2NKRlVEaDlDbzhldzAwemt2RVhQM2lrOVxuTWEyam5FUWtZMlV6Q2E5T0UwRlA0NEZva0QrZGcyVGU5RjVGRHBPekFvR0FhcWdMUmt0Tm55SEhRd2JTREtHaVxuQXlUOXl4U24yelQ4WkxmQUo5STcvejhZNDhkNm5yZGM4aWpKK1U2QzFhVXNLMHZBcVRycHg3dlZONmJReUVwS1xuUm42SGpCTXhUeVNNMEZuK25DVjNFbEkweis0QzllWGMrT0NPRlQyamo5Tnl5UnROZzVYUjc5S2pSYkF1dXdIWlxuSlVkV3MwQ0JOTFozWEk5RnZDRExMT3c9XG4tLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tXG4iLAogICJjbGllbnRfZW1haWwiOiAiZHJvbmUtZ2NzQGxpZnRpdC1vcy5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsCiAgImNsaWVudF9pZCI6ICIxMTE2OTY5NDIzNzUzMzA5Njg3NDQiLAogICJhdXRoX3VyaSI6ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20vby9vYXV0aDIvYXV0aCIsCiAgInRva2VuX3VyaSI6ICJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20vby9vYXV0aDIvdG9rZW4iLAogICJhdXRoX3Byb3ZpZGVyX3g1MDlfY2VydF91cmwiOiAiaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vb2F1dGgyL3YxL2NlcnRzIiwKICAiY2xpZW50X3g1MDlfY2VydF91cmwiOiAiaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vcm9ib3QvdjEvbWV0YWRhdGEveDUwOS9kcm9uZS1nY3MlNDBsaWZ0aXQtb3MuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iCn0K
+    when:
+      branch: [ sandbox, qa, master, staging ]
+      event: [ push, success ]
+
+  deploy-sandbox:
+    image: quay.io/honestbee/drone-kubernetes
+    kubernetes_server: https://35.231.30.174
+    kubernetes_token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJzYW5kYm94Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRyb25lLWRlcGxveS10b2tlbi14NG01ZiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJkcm9uZS1kZXBsb3kiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiIxNTk0NDE4Yi1jOGQ5LTExZTgtODk3MS00MjAxMGE4ZTAxZmMiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6c2FuZGJveDpkcm9uZS1kZXBsb3kifQ.g2PlMvnGuDKVQi0cvId6mZEoRUCw4mNtzVUMfnZhpwNbBc59EEyXLzIes8FuXDgXL7fjLeW8O0QhzHfJTClfCBtjj2NVhqi0jxT-0HM1wCFIv8t3T99Ap8Ao1AyKcWoo_F3uCK6oL1W-DZ9x76wRrn6vHs-PNdYdHBC8kJihRlZVYA6IjwOZx4gvD-zSqwldoQzzTbJLNJMX4V_t5UNLeHYQ9wsK7GGdM3_6qu7k1AYIhDA13nTjH1_4iJ74cYZo-QDe0imbjueccQm2dcDZ0F_IGuc4tOFw-lMo0ynJYqpWL4Ywn2_P5eUyut66F_AlWiytavNRBVTuWrRuJ-QazA
+    deployment: optiuser-sandbox-deployment
+    repo: gcr.io/liftit-os/optiuser
+    container: optiuser-sandbox
+    namespace: sandbox
+    tag: ${DRONE_COMMIT}
+    environment:
+      PLUGIN_NAMESPACE: sandbox
+      PLUGIN_FORCE: "true"
+
+  deploy-qa:
+    image: quay.io/honestbee/drone-kubernetes
+    kubernetes_server: https://35.231.30.174
+    kubernetes_token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRyb25lLWRlcGxveS10b2tlbi02Zmh6YyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJkcm9uZS1kZXBsb3kiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiJkOTA4MDU0OS1iNTEwLTExZTgtODk3MS00MjAxMGE4ZTAxZmMiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpkcm9uZS1kZXBsb3kifQ.qR14c0Hqa87cOVnj06PE7QOrfM69XHPh4WNG2J2DtQI0FhAGrq7ULx62E4Y0MO83e7Oy4CwIFm-bWvNupxcF2PZ6EodCkzvbvlVsugRBYoUla5HJgk1CjA0uII6_qk0Pg1eJAdOImZQ1FZ3eMsGZ1YjdouallN0LjY_eaJeWkcBQ13u6Skzhmjahr8zBxyGPNAKf90qvjHy0ii9SaU0BD88VwjkM64OimXR8SZS2UfVDjvLsJl34qRHqWiPMPrPEVowyEH1k_ZSMXX2de1FGQEgE18v6hYi_gFsOFZ5QtGUjc5oZZKrTknagteBdyOWmgbFGPHvISGuNgZAvVS_h8Q
+    deployment: optiuser-qa-deployment
+    repo: gcr.io/liftit-os/optiuser
+    container: optiuser-qa
+    tag: ${DRONE_COMMIT}
+    environment:
+      PLUGIN_FORCE: "true"
+    when:
+      branch: [ qa ]
+      event: [ push, success ]
+
+  deploy-staging:
+    image: quay.io/honestbee/drone-kubernetes
+    kubernetes_server: https://35.231.30.174
+    kubernetes_token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJzdGFnaW5nIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRyb25lLWRlcGxveS10b2tlbi1mc2Q4ZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJkcm9uZS1kZXBsb3kiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI0ZjNiMmVmOS1jODEyLTExZTgtODk3MS00MjAxMGE4ZTAxZmMiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6c3RhZ2luZzpkcm9uZS1kZXBsb3kifQ.aqh79LnR1-xUD-DWU0sgmtPIo46GpZIfIwKNLlS_AHRN8Fgl3fjcWbRWXurKLD8_MSm-cmrGsSv94k7MV9OmG3cl22YijEAnwqjG7-GAccTB3BK7RluhkujgEogVpXftC_yzEqUHcnTbo2ex40-mh1WLNl3lsF9EQ0x-ds9Zwv_Sz5w4lrSE1aTjff_Ew1JijzY4xJ6RtJM3xtQldZPYMNw1EDO6yWaNfolE1hsmPQD5tk0pqi-_pPgd_EQa5XORLmxE_eRhrDBYX7XbCj3CEfiLMl7aYkDyLcrqgUrhLjUY1Uhb4G3t5Upe2W3zQdIWKQQwI9cKEU8899bIYs0A2g
+    deployment: optiuser-staging-deployment
+    repo: gcr.io/liftit-os/optiuser
+    container: optiuser-staging
+    namespace: staging
+    tag: ${DRONE_COMMIT}
+    environment:
+      PLUGIN_FORCE: "true"
+      PLUGIN_NAMESPACE: staging
+    when:
+      branch: [ master, staging ]
+      event: [ push, success ]
+
+  deploy-production:
+    image: quay.io/honestbee/drone-kubernetes
+    kubernetes_server: https://35.227.43.187
+    kubernetes_token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRyb25lLWRlcGxveS10b2tlbi00c3RubSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJkcm9uZS1kZXBsb3kiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI4MjE5YWViZC1jYjI2LTExZTgtODk2MC00MjAxMGE4ZTAxODQiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpkcm9uZS1kZXBsb3kifQ.iOd-4qkT9MI303vu4pC-5VgN5x1bIYhuiy-qCp5h7za1QyzIRkVb1pYq2miKQKn_dvTc-KBQ0VK4G9KjbSWE45H67zjJZFPbQfsLdbKxwAd-Ez1Ffz1pYNnxF0C2aO6_Cdtsp9XxIyfcoSKIH33SOqMcSzDNY9FDEqewSnnWTkGkNiZWJ8hk9dG1YFrhawddmqbDzRZCs-BVWY_LKppLyXCN2aNHfS-I2Er7DNsW87q7JXiUPJyptM146sJfyQb4MaPYDoUtVIfTGPJlh9wXPRek9QHY5if2oTzXyPD218-AkBA_LUjNXbyPrXw5MfhuzdX8IlkBzLcytalvhNF8nw
+    namespace: default
+    deployment: optiuser-prod-deployment
+    repo: gcr.io/liftit-os/optiuser
+    container: optiuser-prod
+    tag: ${DRONE_COMMIT}
+    environment:
+      PLUGIN_FORCE: "true"
+    when:
+      branch: [ master ]
+      event: [ push, success ]
+
+  slack:
+    image: plugins/slack
+    channel: devops_notifications
+    webhook: https://hooks.slack.com/services/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
+    icon_url: https://unsplash.it/256/256/?random
+    when:
+      status: [ success, failure ]

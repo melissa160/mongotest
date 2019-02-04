@@ -1,0 +1,6 @@
+.env
+vendor
+main
+*.db
+mongotest
+coverage.html
