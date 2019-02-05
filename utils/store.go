@@ -76,3 +76,9 @@ func CreateUser(db *gorm.DB, user models.UserExample) (models.UserExample, error
 	}
 	return user, nil
 }
+
+// CreateTracker returns all people from DB
+func CreateTracker() []models.TrackerRegister {
+	var newTracker []models.TrackerRegister
+	return newTracker
+}

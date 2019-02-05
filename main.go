@@ -1,16 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"os"
-	"time"
+	"net/http"
 
-	"github.com/jinzhu/gorm"
-	"github.com/mrkaspa/amqputils"
-	"github.com/streadway/amqp"
-
-	"github.com/liftitapp/mongotest/constants"
-	"github.com/liftitapp/mongotest/services"
+	"github.com/gorilla/mux"
+	"github.com/liftitapp/mongotest/handlers"
 	"github.com/liftitapp/mongotest/utils"
 )
 
@@ -31,35 +27,10 @@ func main() {
 	}
 	defer db.Close()
 
-	// RabbitMQ conexion and start services
-	startRabbitAndServices(db)
-}
-
-func startRabbitAndServices(db *gorm.DB) {
-	conn, ch, close, err := amqputils.CreateConnection(os.Getenv("RABBIT_PATH"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer close()
-
-	runExample, err := amqputils.NewServer(ch, constants.ExampleQueue, services.ExampleSaveUser)
-	if err != nil {
-		panic(err)
-	}
-
-	go runExample.Start()
-	utils.Msg(" [*] Waiting for logs. To exit press CTRL+C", "")
-	testRabbitConnection(conn)
-}
-
-func testRabbitConnection(conn *amqp.Connection) {
-	for {
-		ch, err := conn.Channel()
-		if err != nil {
-			ch.Close()
-			panic(err)
-		}
-		ch.Close()
-		time.Sleep(30 * time.Second)
-	}
+	// Router
+	router := mux.NewRouter()
+	router.HandleFunc("/tracking", handlers.CreateTrackerRegister).Methods("POST")
+	//router.HandleFunc("/tracking/{id}", handlers.GetTrackerRegister).Methods("GET")
+	fmt.Println("Starting server on port 8000...")
+	log.Fatal(http.ListenAndServe(":8000", router))
 }
